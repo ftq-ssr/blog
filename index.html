@@ -184,20 +184,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">126</span>
+          <span class="site-state-item-count">127</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
           
-        <span class="site-state-item-count">125</span>
+        <span class="site-state-item-count">128</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -233,7 +233,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/11/04/axsl666-2023%E7%A7%8B%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%80%BB%E7%BB%93/">
+    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/12/02/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5ArceOS%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-ftq/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -247,7 +247,80 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/blog/2023/11/04/axsl666-2023%E7%A7%8B%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">axsl666-2023秋第二阶段总结</a>
+            <a href="/blog/2023/12/02/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5ArceOS%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-ftq/" class="post-title-link" itemprop="url">2023开源操作系统训练营第三阶段ArceOS总结报告-ftq</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-12-02 20:27:19 / Modified: 13:28:17" itemprop="dateCreated datePublished" datetime="2023-12-02T20:27:19+00:00">2023-12-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/oscamp-2023fall-arceos-unikernel/" itemprop="url" rel="index"><span itemprop="name">oscamp 2023fall arceos unikernel</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="ArceOS-Unikernel-总结报告"><a href="#ArceOS-Unikernel-总结报告" class="headerlink" title="ArceOS Unikernel 总结报告"></a>ArceOS Unikernel 总结报告</h1><p>回顾学习ArceOS Unikernel的这两周，我学到了很多相关知识。通过石磊老师的教导，我先是从第一个星期的组件化教程开始，实现了彩色输出，然后完成了对HashMap的移植，在用early算法实现了内存分配器后又完成了 dtb 文件的解析和输出，最后修改原有的协作式调度算法fifo为抢占式调度。这一步步的任务让我逐渐掌握了 Unikernel 的用法，对 ArceOS 的整体架构、内存分配及调度算法有了更深入的了解。<br>然后是第二周的基础任务，分别是：从外部加载应用、将应用拷贝到执行区域并执行、通过 ABI 调用 ArceOS 功能、在 App 中正式调用 ABI 以及支持内核和应用分离的地址空间及切换，基本都是更着做就可以了，通过这些练习，我们也更加深入地了解 ArceOS 系统的运行机制和应用开发技巧。下面本别讲解以下各练习的具体做法及思路。</p>
+<h2 id="练习题思路总结"><a href="#练习题思路总结" class="headerlink" title="练习题思路总结"></a>练习题思路总结</h2><h3 id="练习-1-和-2"><a href="#练习-1-和-2" class="headerlink" title="练习 1 和 2"></a>练习 1 和 2</h3><p>本实验实现加载器 <code>loader</code> ，从外部加载 bin 应用到 ArceOS 地址空间，对头结构的设计要让loader可以读取应用信息。<br>头结构的设计：<br>App总数  App1大小 App1 内容 App2 大小 App2 内容 … AppN 大小 AppN 内容<br>这样就可以很好地管理各个应用程序，从而实现应用程序的加载。</p>
+<h3 id="练习-3"><a href="#练习-3" class="headerlink" title="练习 3"></a>练习 3</h3><p>在之前实验的基础上修改汇编指令以及 <code>loader</code> 改用批处理的方式加载外部应用即可。</p>
+<h3 id="练习-4"><a href="#练习-4" class="headerlink" title="练习 4"></a>练习 4</h3><p>本实验只需要添加 <code>SYS_TERMINATE</code> 系统调用，然后让 <code>SYS_TERMINATE</code> 直接调用 <code>axstd::process::exit</code> 即可。</p>
+<h3 id="练习-5"><a href="#练习-5" class="headerlink" title="练习 5"></a>练习 5</h3><p>这个练习的前两个要求都不难，难的是第三个要求，每一次ABI调用返回到<code>loader</code>的时候都需要返回到应用上一条指令的状态，所以ABI调用的时候需要保存上下文。但在实现时发现a7会一直变化，所以需要使用clobber_abi(“C”) 并额外用临时寄存器存放和加载 <code>abi_table</code> 。最终实现上下文的保存。</p>
+<h3 id="练习-6"><a href="#练习-6" class="headerlink" title="练习 6"></a>练习 6</h3><p>基于之前的 <code>hello_app</code> 应用，仅保留 <code>putchar</code> 函数。先将 <code>_start</code> 函数的返回值为 ()，为 APP 建立独立的页表，实现初始化和切换函数，然后将练习5中等待中断的wfi指令去除再加上独立的页表就可以了。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/12/02/axsl666-2023%E7%A7%8B%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="rcore-os Group">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="rcore-os Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/blog/2023/12/02/axsl666-2023%E7%A7%8B%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">axsl666-2023秋第二阶段总结</a>
         </h2>
 
         <div class="post-meta">
@@ -257,7 +330,7 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2023-11-04 02:50:53" itemprop="dateCreated datePublished" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+              <time title="Created: 2023-12-02 13:28:17" itemprop="dateCreated datePublished" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
             </span>
 
           
@@ -436,7 +509,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/11/04/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/">
+    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/12/02/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -450,7 +523,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/blog/2023/11/04/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/" class="post-title-link" itemprop="url">2023开源操作系统训练营总结报告-周睿</a>
+            <a href="/blog/2023/12/02/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/" class="post-title-link" itemprop="url">2023开源操作系统训练营总结报告-周睿</a>
         </h2>
 
         <div class="post-meta">
@@ -460,7 +533,7 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2023-11-04 02:50:53" itemprop="dateCreated datePublished" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+              <time title="Created: 2023-12-02 13:28:17" itemprop="dateCreated datePublished" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
             </span>
 
           
@@ -477,7 +550,7 @@
           <p>首先感谢各位老师以及同学提供的如此丰富的Rust与操作系统相关的学习资料，令本人受益匪浅，下面是本次训练营的总结报告。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/blog/2023/11/04/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/#more" rel="contents">
+              <a class="btn" href="/blog/2023/12/02/2023%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E6%80%BB%E7%BB%93%E6%8A%A5%E5%91%8A-%E5%91%A8%E7%9D%BF/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -532,7 +605,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -611,7 +684,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -699,7 +772,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -780,7 +853,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -899,7 +972,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -997,7 +1070,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1095,7 +1168,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
+                <time title="Modified: 2023-12-02 13:28:17" itemprop="dateModified" datetime="2023-12-02T13:28:17+00:00">2023-12-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1124,78 +1197,6 @@
 <h3 id="ch1-ch2-ch3"><a href="#ch1-ch2-ch3" class="headerlink" title="ch1 ch2 ch3"></a>ch1 ch2 ch3</h3><p>这部分给我开了个好头，os课上学的知识还是比较零碎的。rcore的操作系统发展脉络很清晰，操作系统上的程序怎么运行起来的，如何构建用户态向内核态的系统调用请求，如何构建裸机上的操作系统，都讲述的很清楚。实验部分完成task_info系统调用难度也不大。</p>
 <h3 id="ch4"><a href="#ch4" class="headerlink" title="ch4"></a>ch4</h3><p>地址空间这章感觉是这几章中最难的一章，之前对虚拟内存没什么概念，v3这里也是好长的几章字。学完了现在感觉也是似懂非懂的，<br>不过好在这章实验不是很复杂只需要实现4种系统调用，前面两种还是重写上一章的只不过加入了虚拟地址转换。不过这里有一个神奇的地方在于ch4里面get_time_us()和get_time_ms()产生了很大的误差，而在ch3里面却通过了。</p>
 <h3 id="ch5"><a href="#ch5" class="headerlink" title="ch5"></a>ch5</h3><p>进程这章比较简单。不过让我学习到的地方在于，指导书上面介绍了<br>为什么要实现进程。这章实验要求在新增进程功能下，不仅让代码能通过之前的测试，还要新实现sys_spawn,以及进程调度算法，不过总的不算困难。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/blog/2023/11/03/rCore-Blog-epoche/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-      <meta itemprop="name" content="rcore-os Group">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="rcore-os Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2023/11/03/rCore-Blog-epoche/" class="post-title-link" itemprop="url">rCore_Blog_epoche</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-11-03 11:04:22" itemprop="dateCreated datePublished" datetime="2023-11-03T11:04:22+00:00">2023-11-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-11-04 02:50:53" itemprop="dateModified" datetime="2023-11-04T02:50:53+00:00">2023-11-04</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="rCore-二阶段总结"><a href="#rCore-二阶段总结" class="headerlink" title="rCore 二阶段总结"></a>rCore 二阶段总结</h2><p>第一次看到训练营的通知是在 Rust 中文社区，本着尽可能的抓住所有学习的机会就随手报了训练营，<br>结果被 Rust 的语法的优雅，还有操作系统的复杂性，功能性深深吸引，奈何我只有一些通识导论课的基础，没有关于 Risc-v 或计算机体系结构等的课程基础，所以<br>学期二阶段的课程非常的慢，不过还好，赶上了截止日期。</p>
-<p>第一第二章是教学演示用的，但是为了能跑起来我还是花了很长时间，在 mac 下配置 docker，在 docker 里配置实验环境也是踩了不少的坑。<br>rCore 以一种计算机操作系统历史的教学方法，从简单到困难，从底层的基础到高深的抽象，使得我虽然没有什么计算机基础（只有简单的编程基础）也能学的津津有味。</p>
-<p>ch1 讲的是一个最小用户态的执行环境操作系统，使得可以在裸机上，不调用任何标准库，通过编写的 kernel 以及实现的 <code>sys_write</code> 系统调用接口，来打印属于 rCore 的 <code>hello world!</code>。<br>这一章给我带来的极大的兴趣，让我对操作系统的认知从之前的一个深不可测的黑盒到现在的“最基本的是一个执行环境”。</p>
-<p>ch2 则针对操作系统的任务执行过程来讲，实现了从第一章的只能运行一个应用程序的最小用户态执行环境到可以一次性将多个任务加载到内存，并分别处理多个任务的批处理操作系统，提高了运行效率。</p>
-<p>ch3 则更进一步，引入了程序自动放弃cpu的控制权 <code>yeild</code> 和系统在时间片下主动暂停程序执行的时钟中断，更进一步的提高了运行效率。</p>
-<p>ch4 引入了内存空间这一概念，个人觉得这一章是我看到现在为止最复杂的一章，多级页表的设计，任务管理器与页表的连接，以及跳板的作用，如何处理陷入，非常复杂，第一次看完还是很蒙，但是头铁直接去做 lab2，边做边看源码，也慢慢的理解了其设计逻辑。</p>
-<p>ch5 引入了进程的概念，更加细化了应用执行过程，代码逻辑中将 TaskManager 二分为处理 保存系统中存在的进程的容器 和 cpu 正在执行的进程。在从 ch4 迁移到 ch5 中，对我来说还是有一点难度。</p>
-<p>rCore 的文档对于像我这样的新手来说非常好，实验难度也适中，给我的感觉是实验本身要实现的逻辑不是很难，但是实验的要求应该也不是仅仅通过测试用例，还要了解阅读 rCore 的核心代码和逻辑。<br>才能得到更好的收获。</p>
 
       
     </div>
